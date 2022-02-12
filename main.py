@@ -14,7 +14,7 @@ def build_map(lon, wid, siz, mod):
         print("Ошибка выполнения запроса:")
         print(map_req)
         print("Http статус:", resp.status_code, "(", resp.reason, ")")
-        return None
+        sys.exit(1)
 
     img = Image.open(io.BytesIO(resp.content)).convert('RGB')
     return pygame.image.fromstring(img.tobytes(), img.size, "RGB")
