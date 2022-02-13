@@ -3,10 +3,21 @@ from PIL import Image
 import pygame
 import requests
 import io
+import json as js
 
 
-def build_map(lon, wid, siz, mod):
-    map_req = f"http://static-maps.yandex.ru/1.x/?ll={lon},{wid}&spn={siz},{siz}&l={mod}&size=450,450"
+def build_map(lon, wid, siz, mod, point_li=None):
+    if point_li is None:
+        point_li = []
+    if point_li:
+        st_of_points = "&pt="
+        for j in range(len(point_li)):
+            st_of_points += f"{point_li[j][0]},{point_li[j][1]},pmwtm{j + 1}~"
+        st_of_points = st_of_points[:-1]
+        map_req = f"http://static-maps.yandex.ru/1.x/?ll={lon},{wid}&spn={siz},{siz}&l={mod}&size=450,450" \
+                  f"{st_of_points}"
+    else:
+        map_req = f"http://static-maps.yandex.ru/1.x/?ll={lon},{wid}&spn={siz},{siz}&l={mod}&size=450,450"
     resp = requests.get(map_req)
 
     if not resp:
@@ -22,17 +33,28 @@ def build_map(lon, wid, siz, mod):
 def geocoder_address(address):
     map_req = f"https://geocode-maps.yandex.ru/1.x/" \
               f"?format=json&apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={address}"
-    ll = 37.038186
-    lw = 55.312148
-    hl = 38.2026
-    hw = 56.190802
     resp = requests.get(map_req)  # я не знаю как прасить JSON
+    js_resp = js.loads(resp.content)
+    try:
+        lower_corner = str(js_resp['response']['GeoObjectCollection']['metaDataProperty']['GeocoderResponseMetaData']
+                           ['boundedBy']['Envelope']['lowerCorner']).split(" ")
+        upper_corner = str(js_resp['response']['GeoObjectCollection']['metaDataProperty']['GeocoderResponseMetaData']
+                           ['boundedBy']['Envelope']['upperCorner']).split(" ")
+    except(BaseException):
+        print("biba")
+        lower_corner = [0, 0]
+        upper_corner = [0, 0]
+    ll = float(lower_corner[0])
+    lw = float(lower_corner[1])
+    hl = float(upper_corner[0])
+    hw = float(upper_corner[1])
     end_l = (ll + hl) / 2
     end_h = (lw + hw) / 2
     siz = max([hl - ll, hw - lw])
     return [end_l, end_h, siz]
 
 
+points_on_map = []
 loc_name = ""
 longitude = 37.595000  # Долгота
 width = 55.726000  # Широта
@@ -99,10 +121,10 @@ while run:
                 if loc_name != "":
                     geocoder_place = geocoder_address(loc_name)
                     longitude, width,  = geocoder_place[0], geocoder_place[1]
+                    points_on_map.append((geocoder_place[0], geocoder_place[1]))
                     for i in range(len(size)):
                         if size[i] > geocoder_place[2]:
-                            zoom_level = i - 1
-                            print(size[i])
+                            zoom_level = i
                             break
                     update = True
             elif event.key == pygame.K_BACKSPACE:
@@ -113,7 +135,7 @@ while run:
 
     if update:
         screen.fill((0, 0, 0))
-        screen_bg = build_map(longitude, width, size[zoom_level], modes[mode_num])
+        screen_bg = build_map(longitude, width, size[zoom_level], modes[mode_num], points_on_map)
         screen.blit(screen_bg, (0, 0))
         update = False
     screen.blit(screen_bg, (0, 0))
