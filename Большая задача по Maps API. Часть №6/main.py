@@ -41,9 +41,11 @@ def geocoder_address(address):
         upper_corner = str(js_resp['response']['GeoObjectCollection']['metaDataProperty']['GeocoderResponseMetaData']
                            ['boundedBy']['Envelope']['upperCorner']).split(" ")
     except(BaseException):
-        print("biba")
-        lower_corner = [0, 0]
-        upper_corner = [0, 0]
+        lower_corner = str(js_resp['response']['GeoObjectCollection']['featureMember']
+                           [0]['GeoObject']['boundedBy']['Envelope']['lowerCorner']).split(" ")
+        upper_corner = str(js_resp['response']['GeoObjectCollection']['featureMember']
+                           [0]['GeoObject']['boundedBy']['Envelope']['upperCorner']).split(" ")
+    print(lower_corner, upper_corner)
     ll = float(lower_corner[0])
     lw = float(lower_corner[1])
     hl = float(upper_corner[0])
