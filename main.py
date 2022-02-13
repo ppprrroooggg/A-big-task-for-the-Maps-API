@@ -20,9 +20,17 @@ def build_map(lon, wid, siz, mod):
 
 
 def geocoder_address(address):
-    map_req = f"https://geocode-maps.yandex.ru/1.x/?apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={address}"
-    resp = requests.get(map_req)
-    print(resp.content)
+    map_req = f"https://geocode-maps.yandex.ru/1.x/" \
+              f"?format=json&apikey=40d1649f-0493-4b70-98ba-98533de7710b&geocode={address}"
+    ll = 37.038186
+    lw = 55.312148
+    hl = 38.2026
+    hw = 56.190802
+    resp = requests.get(map_req)  # я не знаю как прасить JSON
+    end_l = (ll + hl) / 2
+    end_h = (lw + hw) / 2
+    siz = max([hl - ll, hw - lw])
+    return [end_l, end_h, siz]
 
 
 loc_name = ""
@@ -77,21 +85,29 @@ while run:
                     width += size[zoom_level]
                     width = round(width, 6)
                     update = True
-            if event.key == pygame.K_1:
+            if event.key == pygame.K_1 and pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 mode_num = 0
                 update = True
-            if event.key == pygame.K_2:
+            if event.key == pygame.K_2 and pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 mode_num = 1
                 update = True
-            if event.key == pygame.K_3:
+            if event.key == pygame.K_3 and pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 mode_num = 2
                 update = True
 
             if event.key == pygame.K_RETURN:
-                geocoder_address(loc_name)
+                if loc_name != "":
+                    geocoder_place = geocoder_address(loc_name)
+                    longitude, width,  = geocoder_place[0], geocoder_place[1]
+                    for i in range(len(size)):
+                        if size[i] > geocoder_place[2]:
+                            zoom_level = i - 1
+                            print(size[i])
+                            break
+                    update = True
             elif event.key == pygame.K_BACKSPACE:
                 loc_name = loc_name[:-1]
-            else:
+            elif not update:
                 loc_name += event.unicode
             tex_render = FONT.render(loc_name, True, (0, 0, 0))
 
