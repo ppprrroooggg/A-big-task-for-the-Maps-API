@@ -139,6 +139,7 @@ while run:
                         if size[i] > geocoder_place[2]:
                             zoom_level = i
                             break
+                        zoom_level = i
                     update = True
             elif event.key == pygame.K_BACKSPACE:
                 loc_name = loc_name[:-1]
