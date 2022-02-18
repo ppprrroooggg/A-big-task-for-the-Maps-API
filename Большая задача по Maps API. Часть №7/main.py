@@ -145,7 +145,7 @@ while run:
             if 300 <= mouse[0] <= 450 and 400 <= mouse[1] <= 450:
                 points_on_map.clear()
                 update = True
-
+    
     if 300 <= mouse[0] <= 450 and 400 <= mouse[1] <= 450:
         btn_color = light_black
     else:
