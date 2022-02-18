@@ -76,6 +76,11 @@ FONT_SEC = pygame.font.Font(None, 45)
 tex_render = FONT.render(loc_name, True, (255, 0, 0))
 screen_bg = None
 screen = pygame.display.set_mode((450, 450))
+
+string = pygame.Surface((450, 25))
+string.set_alpha(150)
+string.fill((200, 200, 200))
+
 update = True
 run = True
 while run:
@@ -157,6 +162,7 @@ while run:
         screen.blit(screen_bg, (0, 0))
         update = False
     screen.blit(screen_bg, (0, 0))
+    screen.blit(string, (0, 0))
     screen.blit(tex_render, (0, 0))
     pygame.draw.rect(screen, btn_color, [300, 400, 150, 50])
     screen.blit(FONT_SEC.render("Обновить", True, (255, 255, 255)), (304, 410))
